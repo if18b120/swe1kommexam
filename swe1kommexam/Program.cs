@@ -1,4 +1,5 @@
-﻿using System;
+﻿using swe1kommexam.classes;
+using System;
 
 namespace swe1kommexam
 {
@@ -6,7 +7,8 @@ namespace swe1kommexam
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Server server = new Server();
+            server.Run();
         }
     }
 }
