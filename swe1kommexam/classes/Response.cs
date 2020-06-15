@@ -4,6 +4,7 @@ using System.IO;
 using System.Net.Mime;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 
 namespace swe1kommexam.classes
 {
@@ -28,7 +29,9 @@ namespace swe1kommexam.classes
 
         public void Send(System.IO.Stream networkstream)
         {
+            Thread thread = Thread.CurrentThread;
             StreamWriter sw = new StreamWriter(networkstream, Encoding.UTF8);
+
             sw.WriteLine("HTTP/1.1 " + status);
             sw.WriteLine("Server: " + serverHeader);
 
@@ -37,10 +40,27 @@ namespace swe1kommexam.classes
                 sw.WriteLine(key + ": " + value);
             }
             sw.WriteLine();
-            sw.Flush();
-
+            try
+            {
+                sw.Flush();
+            }
+            catch (IOException e)
+            {
+                Console.WriteLine("    thread" + thread.ManagedThreadId + ": exception " + e);
+            }
+            Console.WriteLine("thread" + thread.ManagedThreadId + ": header sent");
             sw.Write(content);
-            sw.Flush();
+            try
+            {
+                sw.Flush();
+            }
+            catch (IOException e)
+            {
+                Console.WriteLine("    thread" + thread.ManagedThreadId + ": exception " + e);
+            }
+            
+            Console.WriteLine("thread" + thread.ManagedThreadId + ": body sent");
+            sw.Close();
         }
     }
 }

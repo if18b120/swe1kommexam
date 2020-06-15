@@ -21,10 +21,12 @@ namespace swe1kommexam.classes
 
         public void Run()
         {
+            Console.WriteLine("server: starting");
             string input = "";
             Thread inputThread = new Thread(() => { input = Console.ReadLine(); });
             inputThread.Start();
             _listener.Start();
+            Console.WriteLine("server: input thread and listener started");
 
             while(input != "x")
             {
@@ -33,12 +35,16 @@ namespace swe1kommexam.classes
                     TcpClient client = _listener.AcceptTcpClient();
                     Thread clientThread = new Thread(new ParameterizedThreadStart(HandleClient));
                     clientThread.Start(client);
+                    Console.WriteLine("server: client connected, thread " + clientThread.ManagedThreadId + " started");
                 }
             }
+            _listener.Stop();
+            Console.WriteLine("server: shutting down");
         }
 
         private void HandleClient(object clientarg)
         {
+            Thread thread = Thread.CurrentThread;
             TcpClient client = (TcpClient)clientarg;
             Request request = new Request(client.GetStream());
             request.SplitHeader();
@@ -49,7 +55,7 @@ namespace swe1kommexam.classes
                 url.CreatePathFromURL();
                 Response response = new Response();
 
-                if (request.method.ToUpper() == "GET" && url.GetContentType() == "html")
+                if (request.method.ToUpper() == "GET" && url.GetContentType() == "html" && File.Exists("./" + url.path))
                 {
                     response.status = "200 OK";
                     response.content = File.ReadAllText("./" + url.path);
@@ -58,8 +64,18 @@ namespace swe1kommexam.classes
                     response.AddHeader("Content-type", "text/html");
                     response.Send(client.GetStream());
                 }
+                else
+                {
+                    response.status = "404 Not Found";
+                    response.content = "";
+                    response.AddHeader("Connection", "close");
+                    response.AddHeader("Content-type", "text/html");
+                    response.Send(client.GetStream());
+                }
             }
             client.Close();
+            
+            Console.WriteLine("thread" + thread.ManagedThreadId + ": closing");
         }
     }
 }
