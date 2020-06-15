@@ -29,6 +29,25 @@ namespace swe1kommexam.classes
             {
                 _path = _rawUrl;
             }
+            if (_path == "/")
+            {
+                _path += "index.html";
+            }
+        }
+
+        public string GetContentType()
+        {
+            string[] segments = _path.Split("/", StringSplitOptions.None);
+            segments = segments[segments.Length - 1].Split(".", StringSplitOptions.None);
+
+            if (segments.Length == 2)
+            {
+                return segments[1];
+            }
+            else
+            {
+                return "unknown";
+            }
         }
     }
 }

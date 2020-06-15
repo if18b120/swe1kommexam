@@ -34,15 +34,15 @@ namespace swe1kommexam.classes
             if (!String.IsNullOrEmpty(_header))
             {
                 splitHeader = _header.Split('\n', StringSplitOptions.RemoveEmptyEntries);
-            }
 
-            splitPair = splitHeader[0].Split(' ', StringSplitOptions.None);
-            _method = splitPair[0];
-            _url = splitPair[1];
-            foreach (string item in splitHeader.Skip(1))
-            {
-                splitPair = item.Split(": ", StringSplitOptions.RemoveEmptyEntries);
-                tokens.Add(splitPair[0], splitPair[1]);
+                splitPair = splitHeader[0].Split(' ', StringSplitOptions.None);
+                _method = splitPair[0];
+                _url = splitPair[1];
+                foreach (string item in splitHeader.Skip(1))
+                {
+                    splitPair = item.Split(": ", StringSplitOptions.RemoveEmptyEntries);
+                    tokens.Add(splitPair[0], splitPair[1]);
+                }
             }
         }
 

@@ -21,20 +21,25 @@ namespace swe1kommexam.classes
 
         public void Run()
         {
+            string input = "";
+            Thread inputThread = new Thread(() => { input = Console.ReadLine(); });
+            inputThread.Start();
             _listener.Start();
 
-            while(true)
+            while(input != "x")
             {
-                TcpClient client = _listener.AcceptTcpClient();
-                Thread serverThread = new Thread(new ParameterizedThreadStart(HandleClient));
-                serverThread.Start(client);
+                if (_listener.Pending())
+                {
+                    TcpClient client = _listener.AcceptTcpClient();
+                    Thread clientThread = new Thread(new ParameterizedThreadStart(HandleClient));
+                    clientThread.Start(client);
+                }
             }
         }
 
         private void HandleClient(object clientarg)
         {
             TcpClient client = (TcpClient)clientarg;
-
             Request request = new Request(client.GetStream());
             request.SplitHeader();
 
@@ -44,7 +49,7 @@ namespace swe1kommexam.classes
                 url.CreatePathFromURL();
                 Response response = new Response();
 
-                if (request.method.ToUpper() == "GET")
+                if (request.method.ToUpper() == "GET" && url.GetContentType() == "html")
                 {
                     response.status = "200 OK";
                     response.content = File.ReadAllText("./" + url.path);
@@ -54,6 +59,7 @@ namespace swe1kommexam.classes
                     response.Send(client.GetStream());
                 }
             }
+            client.Close();
         }
     }
 }
